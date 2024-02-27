@@ -43,7 +43,7 @@ public class UiManager implements Ui {
         primaryStage.getIcons().add(getImage(ICON_APPLICATION));
 
         try {
-            mainWindow = new MainWindow(primaryStage, logic, model);
+            mainWindow = new MainWindow(primaryStage, logic, model, this);
             mainWindow.show(); //This should be called before creating other UI parts
             mainWindow.fillInnerParts();
 
@@ -88,4 +88,15 @@ public class UiManager implements Ui {
         System.exit(1);
     }
 
+    public void enableCommandBox() {
+        mainWindow.enableCommandBox();
+    }
+
+    public void disableCommandBox() {
+        mainWindow.disableCommandBox();
+    }
+
+    public void setResultDisplayText(String s) {
+        mainWindow.setResultDisplayText(s);
+    }
 }

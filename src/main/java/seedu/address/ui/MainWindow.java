@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
@@ -31,6 +32,7 @@ public class MainWindow extends UiPart<Stage> {
     private Stage primaryStage;
     private Logic logic;
     private Model model;
+    private Ui ui;
 
     // Independent Ui parts residing in this Ui container
     private PersonListPanel personListPanel;
@@ -56,21 +58,24 @@ public class MainWindow extends UiPart<Stage> {
     /**
      * Creates a {@code MainWindow} with the given {@code Stage} and {@code Logic}.
      */
-    public MainWindow(Stage primaryStage, Logic logic, Model model) {
+    public MainWindow(Stage primaryStage, Logic logic, Model model, Ui ui) {
         super(FXML, primaryStage);
 
         // Set dependencies
         this.primaryStage = primaryStage;
         this.logic = logic;
         this.model = model;
+        this.ui = ui;
 
         // Configure the UI
         setWindowDefaultSize(logic.getGuiSettings());
 
         setAccelerators();
 
+        primaryStage.setOnCloseRequest(event -> Platform.exit());
+
         helpWindow = new HelpWindow();
-        confirmWindow = new ConfirmWindow(model);
+        confirmWindow = new ConfirmWindow(model, ui);
     }
 
     public Stage getPrimaryStage() {
@@ -175,9 +180,18 @@ public class MainWindow extends UiPart<Stage> {
     private void handleConfirm() {
         if (!confirmWindow.isShowing()) {
             confirmWindow.show();
+            ui.disableCommandBox();
         } else {
             confirmWindow.focus();
         }
+    }
+
+    public void disableCommandBox() {
+        commandBoxPlaceholder.setDisable(true);
+    }
+
+    public void enableCommandBox() {
+        commandBoxPlaceholder.setDisable(false);
     }
 
     public PersonListPanel getPersonListPanel() {
@@ -213,5 +227,9 @@ public class MainWindow extends UiPart<Stage> {
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
+    }
+
+    public void setResultDisplayText(String s) {
+        resultDisplay.setFeedbackToUser(s);
     }
 }

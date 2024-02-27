@@ -17,8 +17,10 @@ public class ConfirmWindow extends UiPart<Stage> {
     private static final String FXML = "ConfirmWindow.fxml";
 
     private static final String CONFIRM_MESSAGE = "Clearing the database is an irreversible action. Proceed? (Y/N)";
+    private static final String SUCCESS_MESSAGE = "Database has been cleared!";
     private static final Logger logger = LogsCenter.getLogger(ConfirmWindow.class);
     private Model model;
+    private Ui ui;
     @FXML
     private TextField confirmTextField;
 
@@ -26,21 +28,23 @@ public class ConfirmWindow extends UiPart<Stage> {
     private Label confirmMessage;
 
     /**
-     * Creates a new HelpWindow.
+     * Creates a new ConfirmWindow.
      *
-     * @param root Stage to use as the root of the HelpWindow.
+     * @param root Stage to use as the root of the ConfirmWindow.
      */
-    public ConfirmWindow(Stage root, Model model) {
+    public ConfirmWindow(Stage root, Model model, Ui ui) {
         super(FXML, root);
         confirmMessage.setText(CONFIRM_MESSAGE);
+        root.setOnCloseRequest(event -> ui.enableCommandBox());
         this.model = model;
+        this.ui = ui;
     }
 
     /**
      * Creates a new HelpWindow.
      */
-    public ConfirmWindow(Model model) {
-        this(new Stage(), model);
+    public ConfirmWindow(Model model, Ui ui) {
+        this(new Stage(), model, ui);
     }
 
     @FXML
@@ -48,8 +52,11 @@ public class ConfirmWindow extends UiPart<Stage> {
         String commandText = confirmTextField.getText();
         if (commandText.equals("Y")) {
             model.setAddressBook(new AddressBook());
+            ui.setResultDisplayText(SUCCESS_MESSAGE);
         }
         getRoot().hide();
+        ui.enableCommandBox();
+        confirmTextField.setText("");
     }
 
 
