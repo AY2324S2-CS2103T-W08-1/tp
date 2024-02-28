@@ -50,6 +50,23 @@ class JsonAdaptedPerson {
     }
 
     /**
+     * Constructs a {@code JsonAdaptedPerson} with the given person details.
+     */
+    @JsonCreator
+    public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
+                             @JsonProperty("email") String email, @JsonProperty("address") String address,
+                             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        if (tags != null) {
+            this.tags.addAll(tags);
+        }
+        this.remark = "";
+    }
+
+    /**
      * Converts a given {@code Person} into this class for Jackson use.
      */
     public JsonAdaptedPerson(Person source) {
