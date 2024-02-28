@@ -1,18 +1,19 @@
 package seedu.address.ui;
 
+
+import java.util.logging.Logger;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import seedu.address.commons.core.LogsCenter;
-import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 
-import java.util.logging.Logger;
-
+/**
+ * Confirmation window that warns the user that the database will be cleared.
+ */
 public class ConfirmWindow extends UiPart<Stage> {
     private static final String FXML = "ConfirmWindow.fxml";
 
