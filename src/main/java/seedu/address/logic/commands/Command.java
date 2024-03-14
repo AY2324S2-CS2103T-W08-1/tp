@@ -7,6 +7,7 @@ import seedu.address.model.Model;
  * Represents a command with hidden internal logic and the ability to be executed.
  */
 public abstract class Command {
+    public static final String MESSAGE_REQUEST_YN = "Please enter y or n.";
 
     /**
      * Executes the command and returns the result message.

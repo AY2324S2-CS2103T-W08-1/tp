@@ -54,6 +54,9 @@ public class CommentCommand extends Command {
         if (index.getZeroBased() >= lastShownList.size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
+        if (!model.getStatus()) {
+            throw new CommandException(MESSAGE_REQUEST_YN);
+        }
 
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = new Person(

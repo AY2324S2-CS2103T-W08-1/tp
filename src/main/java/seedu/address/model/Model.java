@@ -84,4 +84,14 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Current state of the CommandBox.
+     */
+    boolean getStatus();
+
+    /**
+     * Sets the state of the CommandBox.
+     */
+    void setStatus(boolean b);
 }
