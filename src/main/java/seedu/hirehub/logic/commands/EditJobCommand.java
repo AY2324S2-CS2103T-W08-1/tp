@@ -31,7 +31,10 @@ public class EditJobCommand extends Command {
             + "Parameters: INDEX (must be a positive integer) "
             + "[" + PREFIX_TITLE + "TITLE] "
             + "[" + PREFIX_DESCRIPTION + "DESCRIPTION] "
-            + "[" + PREFIX_VACANCY + "VACANCY] ";
+            + "[" + PREFIX_VACANCY + "VACANCY]\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + PREFIX_DESCRIPTION + "Must be proficient in C or C++ "
+            + PREFIX_VACANCY + "15";
 
     public static final String MESSAGE_EDIT_JOB_SUCCESS = "Edited Job: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
