@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import seedu.hirehub.logic.parser.Prefix;
+import seedu.hirehub.model.application.Application;
 import seedu.hirehub.model.job.Job;
 import seedu.hirehub.model.person.Person;
 
@@ -70,4 +71,16 @@ public class Messages {
                 + ")";
     }
 
+    /**
+     * Formats the {@code application} for display to the user.
+     */
+    public static String format(Application application) {
+        return "Application(Person: "
+                + application.getPerson().getName()
+                + "; Job: "
+                + application.getJob().getTitle()
+                + "; Status: "
+                + application.getStatus()
+                + ")";
+    }
 }
