@@ -17,7 +17,7 @@ import seedu.hirehub.model.job.Job;
  */
 public class AddJobCommand extends Command {
     public static final String COMMAND_WORD = "add_job";
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a new job to list of open jobs. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a new job to list of open jobs.\n"
             + "Parameters: "
             + PREFIX_TITLE + "TITLE "
             + "[" + PREFIX_DESCRIPTION + "DESCRIPTION] "

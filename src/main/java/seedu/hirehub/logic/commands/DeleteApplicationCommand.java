@@ -14,7 +14,7 @@ public class DeleteApplicationCommand extends Command {
     public static final String COMMAND_WORD = "delete_app";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Deletes a selected job application from "
-            + "the list of job applications \n"
+            + "the list of job applications\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 2";
     public static final String DELETE_APPLICATION_SUCCESS = "Job application for candidate \"%1$s\" "
