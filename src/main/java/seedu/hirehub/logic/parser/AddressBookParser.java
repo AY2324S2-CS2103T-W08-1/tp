@@ -26,7 +26,11 @@ import seedu.hirehub.logic.commands.HelpCommand;
 import seedu.hirehub.logic.commands.InitClearCommand;
 import seedu.hirehub.logic.commands.ListApplicationCommand;
 import seedu.hirehub.logic.commands.ListCommand;
+import seedu.hirehub.logic.commands.ListJobCommand;
+import seedu.hirehub.logic.commands.SearchApplicationCommand;
 import seedu.hirehub.logic.commands.SearchCommand;
+import seedu.hirehub.logic.commands.SearchJobCommand;
+import seedu.hirehub.logic.commands.SlotsLeftCommand;
 import seedu.hirehub.logic.commands.StatusCommand;
 import seedu.hirehub.logic.commands.TagCommand;
 import seedu.hirehub.logic.parser.exceptions.ParseException;
@@ -113,14 +117,26 @@ public class AddressBookParser {
         case DeleteJobCommand.COMMAND_WORD:
             return new InitDeleteJobCommandParser().parse(arguments);
 
+        case SearchJobCommand.COMMAND_WORD:
+            return new SearchJobCommandParser().parse(arguments);
+
         case AddApplicationCommand.COMMAND_WORD:
             return new AddApplicationCommandParser().parse(arguments);
 
         case DeleteApplicationCommand.COMMAND_WORD:
             return new InitDeleteApplicationCommandParser().parse(arguments);
 
+        case SearchApplicationCommand.COMMAND_WORD:
+            return new SearchApplicationCommandParser().parse(arguments);
+
         case ListApplicationCommand.COMMAND_WORD:
             return new ListApplicationCommand();
+
+        case SlotsLeftCommand.COMMAND_WORD:
+            return new SlotsLeftCommandParser().parse(arguments);
+
+        case ListJobCommand.COMMAND_WORD:
+            return new ListJobCommand();
 
         default:
             logger.finer("This user input caused a ParseException: " + userInput);
