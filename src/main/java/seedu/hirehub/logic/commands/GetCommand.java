@@ -20,7 +20,7 @@ public class GetCommand extends Command {
     public static final String COMMAND_WORD = "get";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds a candidate at the specified "
-            + "entry in the database displayed in the HireHub application\n"
+            + "entry in the candidate list displayed in the HireHub application\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 3";
 

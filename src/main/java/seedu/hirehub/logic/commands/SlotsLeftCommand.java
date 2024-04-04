@@ -18,7 +18,7 @@ public class SlotsLeftCommand extends Command {
     public static final String COMMAND_WORD = "slots_left";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Retrieves the number of slots left for the selected "
-            + "job computed by subtracting the number of accepted candidates from total vacancies\n"
+            + "job, computed by subtracting the number of accepted candidates from total vacancies.\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 2";
     public static final String SLOTS_LEFT_SUCCESS = "There are %1$d vacancies left for job \"%2$s\"";

@@ -6,10 +6,10 @@ import seedu.hirehub.logic.CommandBoxState;
 import seedu.hirehub.model.Model;
 
 /**
- * Aborts the delete command.
+ * Aborts the delete_job command.
  */
 public class AbortDeleteJobCommand extends Command {
-    public static final String MESSAGE_SUCCESS = "Deletion of job aborted";
+    public static final String MESSAGE_SUCCESS = "Deletion of job aborted.";
 
     @Override
     public CommandResult execute(Model model) {

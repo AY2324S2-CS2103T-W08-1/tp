@@ -27,16 +27,16 @@ public class StatusCommand extends Command {
             + "Example: " + COMMAND_WORD + " 1 "
             + "OFFERED";
 
-    public static final String MESSAGE_STATUS_PERSON_SUCCESS = "Status of Candidate Successfully"
-            + " Updated to %1$s";
+    public static final String MESSAGE_STATUS_PERSON_SUCCESS = "Status of application successfully "
+            + "updated to %1$s";
 
     public static final String MESSAGE_DUPLICATE_STATUS = "This candidate with identical recruitment status %1$s "
-            + "already exists in the application list";
+            + "already exists in the application list.";
 
-    public static final String MESSAGE_EXCEEDS_VACANCY = "The number of accepted candidates already meets the"
-            + " stipulated vacancy.\nTo accept more candidates, the vacancy for the job can be increased via the"
-            + " edit_job command, or change status for existing application(s) to this job via status command to"
-            + " a status other than OFFERED.\nYou can retrieve vacancies left via slots_left command";
+    public static final String MESSAGE_EXCEEDS_VACANCY = "The number of accepted candidates already meets the "
+            + "stipulated vacancy.\nTo accept more candidates, the vacancy of the job can be increased via the "
+            + "edit_job command, or change status for existing application(s) to this job via status command to "
+            + "a status other than OFFERED.\nYou can retrieve vacancies left via slots_left command.";
     private final Index index;
     private final Status status;
 

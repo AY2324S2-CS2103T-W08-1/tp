@@ -9,7 +9,7 @@ import seedu.hirehub.model.Model;
  * Aborts the delete command.
  */
 public class AbortDeleteCommand extends Command {
-    public static final String MESSAGE_SUCCESS = "Deletion of candidate aborted";
+    public static final String MESSAGE_SUCCESS = "Deletion of person aborted.";
 
     @Override
     public CommandResult execute(Model model) {

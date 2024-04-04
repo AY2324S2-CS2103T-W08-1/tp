@@ -20,6 +20,8 @@ public class SearchApplicationCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all applications whose attributes match all "
             + "the corresponding specified attributes.\n"
+            + "For email and status, only full words will be matched,\n"
+            + "while for title, partial words will be matched.\n"
             + "Parameters: [" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_TITLE + "TITLE] "
             + "[" + PREFIX_STATUS + "STATUS]\n"

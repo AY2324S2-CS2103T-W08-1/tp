@@ -12,7 +12,7 @@ public class ListApplicationCommand extends Command {
 
     public static final String COMMAND_WORD = "list_app";
 
-    public static final String MESSAGE_SUCCESS = "Listed all available applications from the list!";
+    public static final String MESSAGE_SUCCESS = "Listed all available applications from the application list!";
 
 
     @Override

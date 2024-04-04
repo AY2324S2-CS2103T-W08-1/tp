@@ -12,7 +12,7 @@ public class ListJobCommand extends Command {
 
     public static final String COMMAND_WORD = "list_job";
 
-    public static final String MESSAGE_SUCCESS = "Listed all available jobs from the list!";
+    public static final String MESSAGE_SUCCESS = "Listed all available jobs from the job list!";
 
     @Override
     public CommandResult execute(Model model) {

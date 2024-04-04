@@ -20,6 +20,8 @@ public class SearchJobCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all jobs whose attributes match all "
             + "the corresponding specified attributes.\n"
+            + "For vacancy, only jobs with the same vacancy will be matched,\n"
+            + "while for title and description, partial words will be matched.\n"
             + "Parameters: [" + PREFIX_TITLE + "TITLE] "
             + "[" + PREFIX_DESCRIPTION + "DESCRIPTION] "
             + "[" + PREFIX_VACANCY + "VACANCY]\n"

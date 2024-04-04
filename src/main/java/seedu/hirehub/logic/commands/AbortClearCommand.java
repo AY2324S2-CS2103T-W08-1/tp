@@ -9,7 +9,7 @@ import seedu.hirehub.model.Model;
  * Aborts the clearing of the database.
  */
 public class AbortClearCommand extends Command {
-    public static final String MESSAGE_SUCCESS = "Clearing aborted";
+    public static final String MESSAGE_SUCCESS = "Clearing aborted.";
 
     @Override
     public CommandResult execute(Model model) {

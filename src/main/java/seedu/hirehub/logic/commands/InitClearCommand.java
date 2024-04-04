@@ -10,8 +10,8 @@ import seedu.hirehub.model.Model;
  */
 public class InitClearCommand extends Command {
     public static final String COMMAND_WORD = "clear";
-    public static final String MESSAGE_SUCCESS = "Clearing the database is irreversible. Proceed? (Y/N)";
-    public static final String MESSAGE_DATABASE_EMPTY = "The database is empty.";
+    public static final String MESSAGE_SUCCESS = "Clearing the person list is irreversible. Proceed? (Y/N)";
+    public static final String MESSAGE_DATABASE_EMPTY = "The person list is empty.";
 
 
     @Override

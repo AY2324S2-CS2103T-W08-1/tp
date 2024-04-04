@@ -17,7 +17,7 @@ import seedu.hirehub.model.person.Person;
 import seedu.hirehub.model.status.Status;
 
 /**
- * Adds an job application from a candidate to the list of job applications
+ * Adds a job application from a candidate to the list of job applications
  */
 public class AddApplicationCommand extends Command {
     public static final String COMMAND_WORD = "add_app";
@@ -33,13 +33,13 @@ public class AddApplicationCommand extends Command {
     public static final String MESSAGE_ADD_SUCCESS = "New job application added successfully! Candidate \"%1$s\" "
             + "applied for the job \"%2$s\"";
     public static final String MESSAGE_DUPLICATE_APPLICATION = "This candidate already applied for this job "
-            + "and application has been processed already into the list";
+            + "and the application has already been processed into the list.";
     public static final String MESSAGE_NO_PERSON_IN_LIST = "This candidate is not in the current list of candidates!";
-    public static final String MESSAGE_NO_JOB_IN_LIST = "This job has not been created";
+    public static final String MESSAGE_NO_JOB_IN_LIST = "This job is not in the current list of jobs!";
     public static final String MESSAGE_EXCEEDS_VACANCY = "The number of accepted candidates already meets the "
             + "stipulated vacancy.\nTo accept more candidates, the vacancy for the job can be increased via the "
             + "edit_job command, or change status for existing application(s) to this job via status command to "
-            + "a status other than OFFERED.\nYou can retrieve vacancies left via slots_left command";
+            + "a status other than OFFERED.\nYou can retrieve vacancies left via slots_left command.";
 
     private final Email email;
     private final String jobTitle;

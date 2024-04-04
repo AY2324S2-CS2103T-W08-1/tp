@@ -9,7 +9,7 @@ import seedu.hirehub.model.Model;
  * Aborts the delete_app command.
  */
 public class AbortDeleteApplicationCommand extends Command {
-    public static final String MESSAGE_SUCCESS = "Deletion of application aborted";
+    public static final String MESSAGE_SUCCESS = "Deletion of application aborted.";
 
     @Override
     public CommandResult execute(Model model) {

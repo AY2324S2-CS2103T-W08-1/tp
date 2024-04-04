@@ -16,7 +16,7 @@ import seedu.hirehub.model.person.Person;
  * Pushes the program into the state to delete the person at targetIndex.
  */
 public class InitDeleteCommand extends Command {
-    public static final String MESSAGE_SUCCESS = "Delete person. Proceed? (Y/N)";
+    public static final String MESSAGE_SUCCESS = "Delete person selected. Proceed? (Y/N)";
     private final Index targetIndex;
 
 
