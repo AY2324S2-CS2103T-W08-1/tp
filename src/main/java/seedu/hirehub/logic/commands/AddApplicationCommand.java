@@ -41,7 +41,6 @@ public class AddApplicationCommand extends Command {
             + "edit_job command, or change status for existing application(s) to this job via status command to "
             + "a status other than ACCEPTED.\nYou can retrieve vacancies left via slots_left command";
 
-
     private final Email email;
     private final String jobTitle;
     private final Status status;
@@ -81,7 +80,7 @@ public class AddApplicationCommand extends Command {
             throw new CommandException(MESSAGE_DUPLICATE_APPLICATION);
         }
 
-        if (status.equals(new Status("ACCEPTED")) && model.countRemainingVacancy(jobTitle) <= 0) {
+        if (status.equals(new Status("OFFERED")) && model.countRemainingVacancy(jobTitle) <= 0) {
             throw new CommandException(MESSAGE_EXCEEDS_VACANCY);
         }
         model.addApplication(newCandidateApplication);
