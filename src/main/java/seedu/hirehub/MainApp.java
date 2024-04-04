@@ -21,9 +21,15 @@ import seedu.hirehub.model.ModelManager;
 import seedu.hirehub.model.ReadOnlyAddressBook;
 import seedu.hirehub.model.ReadOnlyUserPrefs;
 import seedu.hirehub.model.UserPrefs;
+import seedu.hirehub.model.application.UniqueApplicationList;
+import seedu.hirehub.model.job.UniqueJobList;
 import seedu.hirehub.model.util.SampleDataUtil;
 import seedu.hirehub.storage.AddressBookStorage;
+import seedu.hirehub.storage.ApplicationStorage;
+import seedu.hirehub.storage.JobsStorage;
 import seedu.hirehub.storage.JsonAddressBookStorage;
+import seedu.hirehub.storage.JsonApplicationStorage;
+import seedu.hirehub.storage.JsonJobsStorage;
 import seedu.hirehub.storage.JsonUserPrefsStorage;
 import seedu.hirehub.storage.Storage;
 import seedu.hirehub.storage.StorageManager;
@@ -58,7 +64,9 @@ public class MainApp extends Application {
         UserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(config.getUserPrefsFilePath());
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
         AddressBookStorage addressBookStorage = new JsonAddressBookStorage(userPrefs.getAddressBookFilePath());
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JobsStorage jobsStorage = new JsonJobsStorage(userPrefs.getJobsFilePath());
+        ApplicationStorage applicationStorage = new JsonApplicationStorage(userPrefs.getApplicationsFilePath());
+        storage = new StorageManager(addressBookStorage, userPrefsStorage, jobsStorage, applicationStorage);
 
         model = initModelManager(storage, userPrefs);
 
@@ -68,9 +76,12 @@ public class MainApp extends Application {
     }
 
     /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
+     * Returns a {@code ModelManager} with data
+     * from {@code storage}'s address book and jobs list, {@code userPrefs}. <br>
      * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
      * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
+     * The data from the sample jobs list will be used instead if {@code storage}'s jobs list is not found,
+     * or an empty jobs list will be used instead if errors occur when reading {@code storage}'s jobs list.
      */
     private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
         logger.info("Using data file : " + storage.getAddressBookFilePath());
@@ -81,16 +92,46 @@ public class MainApp extends Application {
             addressBookOptional = storage.readAddressBook();
             if (!addressBookOptional.isPresent()) {
                 logger.info("Creating a new data file " + storage.getAddressBookFilePath()
-                        + " populated with a sample AddressBook.");
+                    + " populated with a sample AddressBook.");
             }
             initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
         } catch (DataLoadingException e) {
             logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
-                    + " Will be starting with an empty AddressBook.");
+                + " Will be starting with an empty AddressBook.");
             initialData = new AddressBook();
         }
 
-        return new ModelManager(initialData, userPrefs);
+        logger.info("Using data file : " + storage.getJobsFilePath());
+        Optional<UniqueJobList> jobListOptional;
+        UniqueJobList initialJobs;
+        try {
+            jobListOptional = storage.readJobList();
+            if (!jobListOptional.isPresent()) {
+                logger.info("Creating a new data file " + storage.getJobsFilePath()
+                    + " populated with a sample jobs list.");
+            }
+            initialJobs = jobListOptional.orElseGet(SampleDataUtil::getSampleUniqueJobList);
+        } catch (DataLoadingException e) {
+            logger.warning("Data file at " + storage.getJobsFilePath() + " could not be loaded."
+                + " Will be starting with an empty jobs list.");
+            initialJobs = new UniqueJobList();
+        }
+
+        Optional<UniqueApplicationList> applicationListOptional;
+        UniqueApplicationList initialApplications;
+        try {
+            applicationListOptional = storage.readApplicationList(initialJobs, initialData);
+            if (!applicationListOptional.isPresent()) {
+                logger.info("Creating a new data file " + storage.getApplicationFilePath()
+                    + " populated with a sample application list.");
+            }
+            initialApplications = applicationListOptional.orElseGet(SampleDataUtil::getSampleUniqueApplicationList);
+        } catch (DataLoadingException e) {
+            logger.warning("Data file at " + storage.getApplicationFilePath() + " could not be loaded."
+                + " Will be starting with an empty application list.");
+            initialApplications = new UniqueApplicationList();
+        }
+        return new ModelManager(initialData, initialJobs, userPrefs, initialApplications);
     }
 
     private void initLogging(Config config) {
@@ -123,7 +164,7 @@ public class MainApp extends Application {
             initializedConfig = configOptional.orElse(new Config());
         } catch (DataLoadingException e) {
             logger.warning("Config file at " + configFilePathUsed + " could not be loaded."
-                    + " Using default config properties.");
+                + " Using default config properties.");
             initializedConfig = new Config();
         }
 
@@ -154,7 +195,7 @@ public class MainApp extends Application {
             initializedPrefs = prefsOptional.orElse(new UserPrefs());
         } catch (DataLoadingException e) {
             logger.warning("Preference file at " + prefsFilePath + " could not be loaded."
-                    + " Using default preferences.");
+                + " Using default preferences.");
             initializedPrefs = new UserPrefs();
         }
 

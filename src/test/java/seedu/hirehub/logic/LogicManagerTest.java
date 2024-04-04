@@ -27,8 +27,12 @@ import seedu.hirehub.model.Model;
 import seedu.hirehub.model.ModelManager;
 import seedu.hirehub.model.ReadOnlyAddressBook;
 import seedu.hirehub.model.UserPrefs;
+import seedu.hirehub.model.application.UniqueApplicationList;
+import seedu.hirehub.model.job.UniqueJobList;
 import seedu.hirehub.model.person.Person;
 import seedu.hirehub.storage.JsonAddressBookStorage;
+import seedu.hirehub.storage.JsonApplicationStorage;
+import seedu.hirehub.storage.JsonJobsStorage;
 import seedu.hirehub.storage.JsonUserPrefsStorage;
 import seedu.hirehub.storage.StorageManager;
 import seedu.hirehub.testutil.PersonBuilder;
@@ -48,7 +52,11 @@ public class LogicManagerTest {
         JsonAddressBookStorage addressBookStorage =
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonJobsStorage jobsStorage = new JsonJobsStorage(temporaryFolder.resolve("jobs.json"));
+        JsonApplicationStorage applicationStorage = new JsonApplicationStorage(
+            temporaryFolder.resolve("applications.json"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+            jobsStorage, applicationStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -123,7 +131,8 @@ public class LogicManagerTest {
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage) {
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UniqueJobList(), new UserPrefs(),
+            new UniqueApplicationList());
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
@@ -160,7 +169,11 @@ public class LogicManagerTest {
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonJobsStorage jobsStorage = new JsonJobsStorage(temporaryFolder.resolve("ExceptionJobs.json"));
+        JsonApplicationStorage applicationStorage = new JsonApplicationStorage(
+            temporaryFolder.resolve("ExceptionApplications.json"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, jobsStorage,
+            applicationStorage);
 
         logic = new LogicManager(model, storage);
 
