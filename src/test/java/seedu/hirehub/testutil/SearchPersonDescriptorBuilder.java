@@ -74,7 +74,7 @@ public class SearchPersonDescriptorBuilder {
     }
 
     /**
-     * Sets the {@code Address} of the {@code SearchPersonDescriptor} that we are building.
+     * Sets the {@code Comment} of the {@code SearchPersonDescriptor} that we are building.
      */
     public SearchPersonDescriptorBuilder withComment(String comment) {
         descriptor.setComment(new Comment(comment));
