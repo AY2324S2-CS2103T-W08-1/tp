@@ -6,6 +6,10 @@ import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.hirehub.commons.core.GuiSettings;
+import seedu.hirehub.model.application.Application;
+import seedu.hirehub.model.application.UniqueApplicationList;
+import seedu.hirehub.model.job.Job;
+import seedu.hirehub.model.job.UniqueJobList;
 import seedu.hirehub.model.person.Person;
 
 /**
@@ -14,6 +18,12 @@ import seedu.hirehub.model.person.Person;
 public interface Model {
     /** {@code Predicate} that always evaluate to true */
     Predicate<Person> PREDICATE_SHOW_ALL_PERSONS = unused -> true;
+
+    /** {@code Predicate} that always evaluate to true */
+    Predicate<Job> PREDICATE_SHOW_ALL_JOBS = unused -> true;
+
+    /** {@code Predicate} that always evaluate to true */
+    Predicate<Application> PREDICATE_SHOW_ALL_APPLICATIONS = unused -> true;
 
     /**
      * Replaces user prefs data with the data in {@code userPrefs}.
@@ -40,10 +50,14 @@ public interface Model {
      */
     Path getAddressBookFilePath();
 
+    Path getJobsFilePath();
+
     /**
      * Sets the user prefs' address book file path.
      */
     void setAddressBookFilePath(Path addressBookFilePath);
+
+    void setJobsFilePath(Path jobsFilePath);
 
     /**
      * Replaces address book data with the data in {@code addressBook}.
@@ -85,8 +99,111 @@ public interface Model {
     Optional<Person> getLastMentionedPerson();
 
     /**
+     * Returns true if an application with the same identity as {@code application} exists in the address book.
+     */
+    boolean hasApplication(Application application);
+
+    /**
+     * Deletes the given application.
+     * The application must exist in the address book.
+     */
+    void deleteApplication(Application target);
+
+    /**
+     * Adds the given application.
+     * {@code application} must not already exist in the address book.
+     */
+    void addApplication(Application application);
+
+    /**
+     * Replaces the given application {@code target} with {@code editedApplication}.
+     * {@code target} must exist in the address book.
+     * The application identity of {@code editedApplication} must not be the same as another
+     * existing application in the address book.
+     */
+    void setApplication(Application target, Application editedApplication);
+
+    UniqueApplicationList getApplicationList();
+
+    /* Updates all applications in application list with current person to new person */
+    void replaceApplications(Person target, Person editedPerson);
+
+    /* Updates all applications in application list with current job to new job */
+    void replaceApplications(Job target, Job editedJob);
+
+    /* Removes all applications in application list with target person */
+    void removeApplications(Person target);
+
+    /* Removes all applications in application list with target job */
+    void removeApplications(Job target);
+
+    /* Clears all applications in the model */
+    void clearApplications();
+
+    /** Returns a number of initial vacancy for the given job */
+    int countVacancy(Job jobToFind);
+
+    /** Returns number of accepted applications for the given job*/
+    int countAccepted(Job jobToFind);
+
+    /** Returns a number of remaining vacancy left for the given job */
+    int countRemainingVacancy(String jobTitle);
+
+    /** Returns an unmodifiable view of the filtered application list */
+    ObservableList<Application> getFilteredApplicationList();
+
+    public void setLastMentionedApplication(Application app);
+
+    public Optional<Application> getLastMentionedApplication();
+
+    UniqueJobList getJobList();
+
+    /**
+     * Returns true if a job with the same identity as {@code job} exists in the address book.
+     */
+    boolean hasJob(Job job);
+
+    /**
+     * Deletes the given job.
+     * The job must exist in the address book.
+     */
+    void deleteJob(Job target);
+
+    /**
+     * Adds the given job.
+     * {@code job} must not already exist in the address book.
+     */
+    void addJob(Job job);
+
+    /**
+     * Replaces the given job {@code target} with {@code editedJob}.
+     * {@code target} must exist in the address book.
+     * The job identity of {@code editedJob} must not be the same as another existing job in the address book.
+     */
+    void setJob(Job target, Job editedJob);
+
+    void setLastMentionedJob(Job job);
+
+    Optional<Job> getLastMentionedJob();
+
+    /** Returns an unmodifiable view of the filtered job list */
+    ObservableList<Job> getFilteredJobList();
+
+    /**
      * Updates the filter of the filtered person list to filter by the given {@code predicate}.
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Updates the filter of the filtered job list to filter by the given {@code predicate}.
+     * @throws NullPointerException if {@code predicate} is null.
+     */
+    void updateFilteredJobList(Predicate<Job> predicate);
+
+    /**
+     * Updates the filter of the filtered application list to filter by the given {@code predicate}.
+     * @throws NullPointerException if {@code predicate} is null.
+     */
+    void updateFilteredApplicationList(Predicate<Application> predicate);
 }

@@ -72,7 +72,9 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/se-
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
-The UI consists of a `MainWindow` that is made up of parts e.g.`CommandBox`, `ResultDisplay`, `PersonListPanel`, `StatusBarFooter` etc. All these, including the `MainWindow`, inherit from the abstract `UiPart` class which captures the commonalities between classes that represent parts of the visible GUI.
+The UI consists of a `MainWindow` that is made up of parts e.g.`CommandBox`, `ResultDisplay`, `PersonListPanel`, `JobListPanel`, `StatusBarFooter` etc. All these, including the `MainWindow`, inherit from the abstract `UiPart` class which captures the commonalities between classes that represent parts of the visible GUI.
+
+Each one of `Job`, `Applicaton` and `Person` has an associated `ListPanel` and `Card`, as indicated with `XXXListPanel` and `XXXCard`.
 
 The `UI` component uses the JavaFx UI framework. The layout of these UI parts are defined in matching `.fxml` files that are in the `src/main/resources/view` folder. For example, the layout of the [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java) is specified in [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml)
 
@@ -100,11 +102,13 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, it is passed to an `AddressBookParser` object which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
+1. When `Logic` is called upon to execute a command, it looks at `Logic`'s `state` and chooses the appropriate `Parser`.
+2. The command is passed to the `Parser` object which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
 1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
    Note that although this is shown as a single step in the diagram above (for simplicity), in the code it can take several interactions (between the command object and the `Model`) to achieve.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
+2. Based on the `CommandResult`, the `state` of the `Logic` can be modified.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
@@ -115,17 +119,21 @@ How the parsing works:
 * All `XYZCommandParser` classes (e.g., `AddCommandParser`, `DeleteCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2324S2-CS2103T-W08-1/tp/blob/master/src/main/java/seedu/hirehub/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />
+<img src="images/ModelClassDiagram.png" width="550" />
 
 
 The `Model` component,
 
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the currently 'selected' `Person` objects (e.g., results of a search query) as a separate _filtered_ list which is exposed to outsiders as an unmodifiable `ObservableList<Person>` that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
+* stores the address book data i.e., all `Person`, `Job`, and `Application` objects (which are contained in a `UniquePersonList`, `UniqueJobList` and `UniqueApplicationList` object, respectively).
+* stores the currently 'selected' `Person`, `Job`, and `Application` objects (e.g., results of a search queries for each `Person`, `Job`, and `Application` object) as a separate _filtered_ list (`filteredPersonList`, `filteredJobList`, and `filteredApplicationList` respectively) which is exposed to outsiders as an unmodifiable `ObservableList<Person>`, `ObservableList<Job>`, and `ObservableList<Application>`, respectively, that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
 * stores a `UserPref` object that represents the user’s preferences. This is exposed to the outside as a `ReadOnlyUserPref` objects.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
+
+Association between Person, Job and Application classes with attributes of respective classes is represented with greater detail in the following UML Diagram:
+
+<img src="images/ModelClassAttributeDiagram.png" width="550" />
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `AddressBook`, which `Person` references. This allows `AddressBook` to only require one `Tag` object per unique tag, instead of each `Person` needing their own `Tag` objects.<br>
 
@@ -136,13 +144,13 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2324S2-CS2103T-W08-1/tp/blob/master/src/main/java/seedu/hirehub/storage/Storage.java)
 
 <img src="images/StorageClassDiagram.png" width="550" />
 
 The `Storage` component,
 * can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
-* inherits from both `AddressBookStorage` and `UserPrefStorage`, which means it can be treated as either one (if only the functionality of only one is needed).
+* inherits from `AddressBookStorage`, `ApplicationStorage`, `JobsStorage`, and `UserPrefsStorage`, which means it can be treated as any combination of the four storage interfaces (if only the functionality of a subset is needed).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
 
 ### Common classes
@@ -155,9 +163,37 @@ Classes used by multiple components are in the `seedu.addressbook.commons` packa
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### EditJob command
+The EditJob command allows the recruiters to edit the details (job title, description, vacancy) for a particular job at a specified index from the job list. Given below is an example usage scenario and how the EditJob mechanism behaves at each step.
+
+Step 1. The user launches the application for the first time. The `HireHub` will be initialized with the initial address book state.
+
+Step 2. The user types `edit_job 2 d/Good at OOP` to change the description of the job at index 2 to `Good at OOP`. This input is passed as an argument to `MainWindow#executeCommand(String)`, which subsequently calls `LogicManager#execute(String)`, which subsequently calls `AddressBookParser#parseCommand(String)`, which then calls `EditJobCommandParser#parse(String)`.
+
+Step 3. `EditJobCommandParser#parse(String)` first checks if the given index is valid, before creating a new `EditJobDescriptor` object, which contains the attributes with the edited information that the `Job` object should have, if present. In this case, it contains `Good at OOP` for its `description` and `null` for the rest. `EditJobCommandParser#parse(String)` then parses the command to return a new `EditJobCommand` object containing the `EditJobDescriptor` object.
+
+Step 4. `EditJobCommand#execute(Model)` is then called in `LogicManager#execute(String)`, where the old job is updated in the job list with `ModelManager#setJob(Job, Job)`, the filtered job list in the model is updated with `ModelManager#updateFilteredJobList(Predicate<Job>)`, and the applications in the application list are updated to contain the edited job with `ModelManager#replaceApplications(Job, Job)`.
+
+Design considerations:
+Aspect: Format of edit_job command:
+
+Alternative 1 (current choice): Use index as argument.
+
+Pros: It is easier for the user to type out the index to use the command.
+Cons: This choice requires the user to know the index, which can only be observed from the UI. If there is a long list of jobs in the UI, observing from the UI may not be so feasible.
+
+We choose this alternative because we have a search_job command which supports narrowing down of the jobs list to find the desired job.
+
+Alternative 2: Use job title as argument.
+
+Pros: Job title is usually known beforehand, and job title is the unique primary key for all jobs in the list.
+Cons: Job title can be quite long and cumbersome for users to type out.
+
+![EditJobSequenceDiagram](images/EditJobSequenceDiagram.png)
+
 ### Get Command
 
-Get command allows the recruiters to retrieve the candidate from the list at specified index in the database. If a recruiter types in "get \[INDEX\]" with valid index, it returns the candidate at that specific index in the list of candidates displayed in the UI. Specifically, get command is implemented via following via following steps:
+Get command allows the recruiters to retrieve the candidate from the list at specified index in the database. If a recruiter types in `get [INDEX]` with valid index, it returns the candidate at that specific index in the list of candidates displayed in the UI. Specifically, get command is implemented via following via following steps:
 
 1. Get command class was created in `Command` file in `Logic` component which constructs a get command with candidate index as an argument
 2. execute() method in getcommand class checks whether index provided by the user is valid (i.e. positive integer with smaller or equal to the size of candidate list) or not, and filters the candidate list with given index number, creating a new `CommandResult` object that output success message
@@ -175,6 +211,66 @@ The following sequence diagram shows how a get operation goes through the `Logic
 
 ![GetSequenceDiagram](images/GetSequenceDiagram.png)
 
+### Search Command
+
+Search Command searches candidates whose attributes match all the corresponding attributes (i.e. intersection of all the matches). Phone, email and country are matched by equality, while name, comment, tag are matched by substring of the candidate attributes. The search operation is executed as follows:
+
+Step 1. The user launches the application for the first time. The `HireHub` will be initialized with the initial address book state.
+
+Step 2. The user types `search n/l c/SG` to retrieve candidates whose name contains `l`and whose country is `SG`. This calls `MainWindow#execute(String)`, which subsequently calls `LogicManager#execute(String)`, which subsequently calls `AddressBookParser#parseCommand(String)`, which then calls `SearchCommandParser#parse(String)`.
+
+Step 3. `SearchCommandParser#parse(String)` creates a new `SearchPersonDescriptor` object, which contains the attributes with the required information that a `Person` object should match, if present. In this case, it contains `l` for its `name` attribute and `SG` for its `country` attribute, and `null` for the rest. `SearchCommandParser#parse(String)` then parses the command to return a new `SearchCommand` object containing the `SearchPersonDescriptor` object.
+
+Step 4. `SearchCommand#execute(Model)` is then called in `LogicManager#execute(String)`, where `SearchPersonDescriptor#getPredicate()` uses the attributes in `SearchPersonDescriptor` to create `ContainsKeywordsPredicate` objects (e.g. `ContainsKeywordsPredicate("n/", Optional.of("l"))`) with the corresponding prefixes and information, before returning a new `SearchPredicate` object containing these `ContainsKeywordsPredicate` objects. Note that a `ContainsKeywordsPredicate` object is created for each attribute, even if it is `null`.
+
+Step 5. `ModelManager#updateFilteredPerson(Predicate<Person>)` (with the `SearchPredicate` object as its argument) is called, where `SearchPredicate#test(Person)` is called. Then for each predicate in the `SearchPredicate` object, `ContainsKeywordsPredicate#test(Person)` is called, which checks if one of the specified attribute contains the specified information (e.g. `ContainsKeywordsPredicate("n/", Optional.of("l"))` tests if `name` contains `l`). `SearchPredicate#test(Person)` then returns people in which **all** `ContainsKeywordsPredicate#test(Person)` in the `SearchPredicate` return `true`. `ModelManager#updateFilteredPerson(Predicate<Person>)` then updates the model to display such people only.
+
+The following sequence diagram shows how a search operation goes through the various components:
+
+![SearchSequenceDiagram](images/SearchSequenceDiagram.png)
+
+Alternatives:
+`SearchPersonDescriptor` may be omitted - in which case, `SearchCommandParser#parse(String)` can directly use the attributes it has parsed to create a `SearchPredicate` object with the relevant attributes and information to search for. However, the methods to test `SearchPersonDescriptor` are readily available, which would ease the testing process.
+
+### SlotsLeft Command
+
+Slots left command finds the remaining vacancies of a specified job at the specified index of the displayed list of jobs. The remaining vacancies is the number of vacancies of the job, subtracted by the number of `OFFERED` applications to that job. The slots left operation is executed as follows:
+
+Step 1. The user launches the application for the first time. The `HireHub` will be initialized with the initial address book state.
+
+Step 2. The user types `slots_left 3` to find the number of remaining vacancies of the job with index `3`. This calls `MainWindow#execute(String)`, which subsequently calls `LogicManager#execute(String)`, which subsequently calls `AddressBookParser#parseCommand(String)`, which then calls `SlotsLeftCommandParser#parse(String)`.
+
+Step 3. `SlotsLeftCommandParser#parse(String)` creates a new `SlotsLeftCommand` object, which contains the index of the job.
+
+Step 4. `SlotsLeftCommand#execute(Model)` is then called in `LogicManager#execute(String)`, where `ModelManager#getFilteredJobList()` is called. `List#get(int)` is then called, which returns a job object. `Job#getTitle()` is then called to return a String (the title of the job), which is then used as an argument for `ModelManager#countRemainingVacancy(String)`, returning the number of remaining vacancies of the job.
+
+The following sequence diagram shows how a SlotsLeft operation goes through the various components:
+
+![SlotsLeftSequenceDiagram](images/SlotsLeftSequenceDiagram.png)
+
+### Add_app Command
+
+Add_app adds an application containing a job and a person
+
+Step 1. The user launches the application for the first time. The `HireHub` will be initialized with the initial address book state. We assume that there is an existing person and job in the initial address book state - a person with an email `example@gmail.com` and a job with title `job`.
+
+Step 2. The user enters `add_app e/example@gmail.com ti/job` to add an application for the person uniquely identified by the email `exampel@gmail.com`, for the job with the title `job`. This calls `MainWindow#execute(String)`, which subsequently calls `LogicManager#execute(String)`, which subsequently calls `AddressBookParser#parseCommand(String)`, which then calls `AddApplicationCommandParser#parse(String)`.
+
+Step 3. `AddApplicationCommandParser#parse(String)` creates a new `AddApplicationCommand` object, which contains the email that a `Person` object should match, and the job title the `Job` should match. In this case, it contains `example@gmail.com` for its `email` attribute and `job` for its `title` attribute, and `PRESCREEN` for the `status` attribute by default.
+
+Step 4.`AddApplicationCommand#execute(Model)` is then called in `LogicManager#execute(String)`, where the matching `Person` and `Job` are found, and an `Application` object containing the `Person` and the `Job` is created. `model#addApplication(Application)` is then called and the `Application` is added to the list of `Application`s in `model`.
+
+### Tag Command
+
+Tag command adds one or more tags to a person. The person retains all tags it had before.
+
+Step 1. The user launches the application for the first time. The `HireHub` will be initialized with the initial address book state. We assume that there is an existing person in the initial address book state - a person at index 1 with tag `t/tag0`.
+
+Step 2. The user enters `tag 1 t/tag1 t/tag2` to add tags to the candidate at 1st entry in the list displayed by UI. This calls `MainWindow#execute(String)`, which subsequently calls `LogicManager#execute(String)`, which subsequently calls `AddressBookParser#parseCommand(String)`, which then calls `TagCommandParser#parse(String)`.
+
+Step 3. `TagCommandParser#parse(String)` creates a new `TagCommand` object, which contains the index that a `Person` object should match, and the `Set<Tag>` of tags to add. In this case, it contains the index 1 and a `Set<Tag>` `[t/tag1, t/tag2]`.
+
+Step 4.`TagCommand#execute(Model)` is then called in `LogicManager#execute(String)`, where the matching `Person` is found and the union of tags present and tags to add is calculated. A new person is created using the tag union and the old person's data. Then, the old person is updated in the person list with `ModelManager#setPerson(Person, Person)`, the filtered person list in the model is updated with `ModelManager#updateFilteredPersonList(Predicate<Person>)`, and the applications in the application list are updated to contain the edited person with `ModelManager#replaceApplications(Person, Person)`.
 
 ### \[Proposed\] Undo/redo feature
 
@@ -309,9 +405,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | recruiter          | keep track of the candidate's interview status                      | facilitate the interview process                                                                                          |
 | `* * *`  | recruiter          | clear the database in one single command                            | avoid typing multiple delete commands                                                                                     |
 | `* * *`  | recruiter          | view the details of a candidate of a particular row in the database | have an absolute reference of the singular candidate that I am interested in                                              |
+| `* * *`  | recruiter          | filter candidates by the jobs they applied                          | see what jobs they apply for                                                                                              |
+| `* * *`  | recruiter          | filter applications by job                                          | have an overview of all the applications for a particular job for easier processing                                       |
+| `* * *`  | recruiter          | delete specific tags                                                | undo mistakes made when adding tags                                                                                       |
+| `* * `   | recruiter          | view the number of vacancies left for each role                     | know when to stop hiring/accepting new candidates                                                                         |
+| `* * `   | recruiter          | view the contact details of potential candidates in tabular format  | see the fields clearly highlighted and defined in the UI                                                                  |
 | `* *`    | careless recruiter | confirm the clearing of the database                                | avoid any accidental deletion of the database                                                                             |
 
-*{More to be added}*
 
 ### Use cases
 
@@ -325,8 +425,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  Recruiter enters the details of the candidate to be added to the list
-2.  Hirehub adds the candidate with the corresponding details as requested
+1.  Recruiter enters the details of the candidate to be added to the list.
+2.  Hirehub adds the candidate with the corresponding details as requested.
 3.  Hirehub displays the details of the added candidate.
 
 Use case ends.
@@ -334,38 +434,38 @@ Use case ends.
 
 **Extensions**
 
-* 2a. Recruiter enters invalid email address
-    - 2a1. Hirehub raises an error and asks recruiter to provide valid email address
-    - 2a2. Recruiter attempts to add the candidate with valid email address
-    - Steps 2a1-2a2 are repeated until the email address entered is in a correct format.
+* 1a. Recruiter enters invalid email address.
+    - 1a1. Hirehub raises an error and asks recruiter to provide valid email address.
+    - 1a2. Recruiter attempts to add the candidate with valid email address.
+    - Steps 1a1-1a2 are repeated until the email address entered is in a correct format.
     - Use case resumes from step 2.
 
 
-* 2b. Recruiter enters invalid phone number
-    - 2b1. Hirehub raises an error and asks recruiter to provide phone number in a correct format
-    - 2b2. Recruiter attempts to add the candidate with valid phone number
-    - Steps 2b1-2b2 are repeated until the phone number entered is in the correct format.
+* 1b. Recruiter enters invalid phone number.
+    - 1b1. Hirehub raises an error and asks recruiter to provide phone number in a correct format.
+    - 1b2. Recruiter attempts to add the candidate with valid phone number.
+    - Steps 1b1-1b2 are repeated until the phone number entered is in the correct format.
     - Use case resumes from step 2.
 
 
-* 2c. Recruiter enters invalid country name
-    - 2c1. Hirehub raises an error and asks recruiter to provide available country name listed in the user guide
-    - 2c2. Recruiter attempts to add the candidate with valid country name
-    - Steps 2c1-2c2 are repeated until the country name entered is in the list of available country names in the user guide.
+* 1c. Recruiter enters invalid country code.
+    - 1c1. Hirehub raises an error and asks recruiter to provide available country code listed in the user guide.
+    - 1c2. Recruiter attempts to add the candidate with valid country code.
+    - Steps 1c1-1c2 are repeated until the country code entered is in the list of available country codes in the user guide.
     - Use case resumes from step 2.
 
 
-* 2d. Recruiter attempts to add the comment field of candidate
-    - 2d1. Hirehub raises an error and asks recruiter to use other method to add candidate comment
-    - 2d2. Recruiter attempts to add the candidate without the comment field
-    - Steps 2d1-2d2 are repeated until the recruiter stops attempting to add the comment field.
+* 1d. Recruiter attempts to add the comment field of candidate.
+    - 1d1. Hirehub raises an error and asks recruiter to use other method to add candidate comment.
+    - 1d2. Recruiter attempts to add the candidate without the comment field.
+    - Steps 1d1-1d2 are repeated until the recruiter stops attempting to add the comment field.
     - Use case resumes from step 2.
 
 
-* 2e. Recruiter does not enter either name, email or country in the attribute field
-    - 2e1. Hirehub raises an error and asks the recruiter to provide name, email and country of the candidate to be added
-    - 2e2. Recruiter attempts to add the candidate with name, email and country
-    - Steps 2e1-2e2 are repeated until the recruiter enters name, email and country.
+* 1e. Recruiter does not enter either name, email, country or phone in the attribute field.
+    - 1e1. Hirehub raises an error and asks the recruiter to provide name, email, country and phone of the candidate to be added.
+    - 1e2. Recruiter attempts to add the candidate with name, email, country and phone.
+    - Steps 1e1-1e2 are repeated until the recruiter enters name, email, country and phone.
     - Use case resumes from step 2.
 
 ---
@@ -380,37 +480,34 @@ Use case ends.
 
 **MSS**
 
-1. Recruiter finds a candidate number to delete from the list displayed in the app
-2. Recruiter deletes the candidate
-3. Hirehub requests the recruiter to confirm the deletion
-4. Recruiter confirms deletion
-5. Hirehub deletes the candidate from the list and displays the deleted candidate with its attributes
+1. Recruiter finds a candidate index to delete from the list displayed in the app.
+2. Recruiter deletes the candidate.
+3. Hirehub requests the recruiter to confirm the deletion.
+4. Recruiter confirms deletion.
+5. Hirehub deletes the candidate from the list and displays the deleted candidate with its attributes.
+
+Use case ends.
 
 
 **Extensions**
 
-* 2a. Recruiter enters invalid candidate number
-    - 2a1. Hirehub raises an error and asks recruiter to provide valid candidate number
-    - 2a2. Recruiter attempts to delete the candidate with valid candidate number
-    - Steps 2a1-2a2 are repeated until the candidate number entered is correct.
-    - Use case resumes from step 2.
+* 2a. Recruiter enters invalid candidate index.
+    - 2a1. Hirehub raises an error and asks recruiter to provide valid candidate index.
+    - 2a2. Recruiter attempts to delete the candidate with valid candidate index.
+    - Steps 2a1-2a2 are repeated until the candidate index entered is correct.
+    - Use case resumes from step 3.
 
 
-* 4a. Recruiter cancels deletion in confirmation stage
-    - 4a1. Hirehub exits the deletion process
-    - 4a2. Recruiter re-attempts to delete the candidate
-    - Use case 4a is repeated if the recruiter cancels the deletion again.
-    - If the recruiter enters invalid candidate number, the use case resumes from 2a.
-    - Use case resumes from step 4.
+* 4a. Recruiter cancels deletion in confirmation stage.
+    - 4a1. Hirehub exits the deletion process.
+    - Use case ends.
 
 
-* 4b. Recruiter enters invalid input for confirmation page
-    - 4b1. Hirehub exists the deletion process
-    - 4b2. Recruiter re-attempts to delete the candidate
+* 4b. Recruiter enters invalid input for confirmation page.
+    - 4b1. Hirehub prompts the recruiter to enter a valid input.
     - Use case 4b is repeated if the recruiter enters invalid input for the confirmation page again.
-    - If the recruiter enters invalid candidate number, the use case resumes from 2a.
-    - Use case resumes from step 4
-
+    - Use case resumes from step 5 if recruiter confirms deletion.
+    - Use case resumes from step 4a if recruiter cancels deletion.
 ---
 
 ### Edit candidate details
@@ -423,61 +520,63 @@ Use case ends.
 
 **MSS**
 
-1. Recruiter finds a candidate number to edit from the list displayed in the app
-2. Recruiter enters the candidate details to update in the list
-3. Hirehub updates the candidate details as requested
-4. Hirehub displays the edited candidate with the edited attributes
+1. Recruiter finds a candidate index to edit from the list displayed in the app.
+2. Recruiter enters the candidate details to update in the list.
+3. Hirehub updates the candidate details as requested.
+4. Hirehub displays the edited candidate with the edited attributes.
+
+Use case ends.
 
 
 **Extensions**
 
-* 3a. Recruiter enters invalid candidate number
-    - 3a1. Hirehub raises an error and asks recruiter to provide valid candidate number
-    - 3a2. Recruiter attempts to delete the candidate with valid candidate number
-    - Steps 3a1-3a2 are repeated until the candidate number entered is correct.
-    - Use case resumes from step 2.
+* 2a. Recruiter enters a candidate index that is not a positive integer.
+    - 2a1. Hirehub raises an error and asks recruiter to provide valid candidate index.
+    - 2a2. Recruiter attempts to edit the candidate with valid candidate index.
+    - Steps 2a1-2a2 are repeated until the candidate index entered is valid.
+    - Use case resumes from step 3.
 
 
-* 3b. Recruiter enters invalid email address
-    - 3b1. Hirehub raises an error and asks recruiter to provide valid email address
-    - 3b2. Recruiter attempts to edit the candidate with valid email address
-    - Steps 3b1-3b2 are repeated until the email address entered is in a correct format.
-    - Use case resumes from step 2.
+* 2b. Recruiter enters invalid email address.
+    - 2b1. Hirehub raises an error and asks recruiter to provide valid email address.
+    - 2b2. Recruiter attempts to edit the candidate with valid email address.
+    - Steps 2b1-2b2 are repeated until the email address entered is in a correct format.
+    - Use case resumes from step 3.
 
 
-* 3c. Recruiter enters invalid phone number
-    - 3c1. Hirehub raises an error and asks recruiter to provide phone number in a correct format
-    - 3c2. Recruiter attempts to edit the candidate with valid phone number
-    - Steps 3c1-3c2 are repeated until the phone number entered is in the correct format.
-    - Use case resumes from step 2.
+* 2c. Recruiter enters invalid phone number.
+    - 2c1. Hirehub raises an error and asks recruiter to provide phone number in a correct format.
+    - 2c2. Recruiter attempts to edit the candidate with valid phone number.
+    - Steps 2c1-2c2 are repeated until the phone number entered is in the correct format.
+    - Use case resumes from step 3.
 
 
-* 3d. Recruiter enters invalid country name
-    - 3d1. Hirehub raises an error and asks recruiter to provide available country name listed in the user guide
-    - 3d2. Recruiter attempts to edit the candidate with valid country name
-    - Steps 3d1-3d2 are repeated until the country name entered is in the list of available country names in the user guide.
-    - Use case resumes from step 2.
+* 2d. Recruiter enters invalid country code.
+    - 2d1. Hirehub raises an error and asks recruiter to provide available country code listed in the user guide.
+    - 2d2. Recruiter attempts to edit the candidate with valid country code.
+    - Steps 2d1-2d2 are repeated until the country code entered is in the list of available country codes in the user guide.
+    - Use case resumes from step 3.
 
 
-* 3e. Recruiter attempts to edit the comment field of candidate
-    - 3e1. Hirehub raises an error and asks recruiter to use other method to update candidate comment
-    - 3e2. Recruiter attempts to edit the candidate without the comment field
-    - Steps 3e1-3e2 are repeated until the recruiter stops attempting to update the comment field.
-    - Use case resumes from step 2.
+* 2e. Recruiter attempts to edit the comment field of candidate.
+    - 2e1. Hirehub raises an error and asks recruiter to use other method to update candidate comment.
+    - 2e2. Recruiter attempts to edit the candidate without the comment field.
+    - Steps 2e1-2e2 are repeated until the recruiter stops attempting to update the comment field.
+    - Use case resumes from step 3.
 
 
-* 3f. No attributes are provided by recruiter to update in the attribute field
-    - 3f1. Hirehub raises an error and asks the recruiter to provide at least one attribute to update
-    - 3f2. Recruiter attempts to edit the candidate with at least one attribute to update
-    - Steps 3f1-3f2 are repeated until recruiter enters at least one attribute to update
-    - Use case resumes from step 2.
+* 2f. No attributes are provided by recruiter to update.
+    - 2f1. Hirehub raises an error and asks the recruiter to provide at least one attribute to update.
+    - 2f2. Recruiter attempts to edit the candidate with at least one attribute to update.
+    - Steps 2f1-2f2 are repeated until recruiter enters at least one attribute to update.
+    - Use case resumes from step 3.
 
 
-* 3g. Recruiter enters invalid candidate number
-    - 3g1. Hirehub raises an error and asks the recruiter to provide correct candidate number from 1 to the number of candidates in the list
-    - 3g2. Recruiter attempts to edit the candidate with valid candidate number within the range
-    - Steps 3g1-3g2 are repeated until recruiter enters valid candidate number
-    - Use case resumes from step 2.
+* 2g. Recruiter enters a positive integer for candidate index that is out of range.
+    - 2g1. Hirehub raises an error and asks the recruiter to provide correct candidate index from 1 to the number of candidates in the list.
+    - 2g2. Recruiter attempts to edit the candidate with valid candidate index within the range.
+    - Steps 2g1-2g2 are repeated until recruiter enters valid candidate index.
+    - Use case resumes from step 3.
 
 ---
 
@@ -491,22 +590,259 @@ Use case ends.
 
 **MSS**
 
-1. Recruiter enters the command to clear the database
-2. Confirmation window opens
-3. Recruiter enters ‘Y’ into the confirmation window to confirm the clearing
-4. The database is cleared and the success message is displayed in the result display text field
+1. Recruiter enters the command to clear the database.
+2. HireHub prompts recruiter to confirm the clearing.
+3. Recruiter enters input into the command box to confirm the clearing.
+4. The database is cleared.
+
+Use case ends.
 
 **Extensions**
 
-4a. Recruiter types in additional stuff after ‘clear’ e.g. ‘clear 1’
-- 4a1. Confirmation window opens as usual. Use case resumes from MSS step 3.
+1a. Recruiter types in additional stuff after ‘clear’ e.g. ‘clear 1’.
+- Use case resumes from step 2.
 
-4b. Recruiter opens the confirmation window and tries to enter additional commands in the command box
-- 4b1. The command box is disabled and he finds that he cannot enter new commands until the confirmation is done. Use case resumes from MSS step 3
+3a. Recruiter tries to enter invalid commands in the command box.
+- 3a1. HireHub prompts recruiter to enter valid input.
+- Use case 3a is repeated if the recruiter enters invalid input for the confirmation page again.
+- Use case resumes from step 4 if recruiter confirms deletion.
+- Use case resumes from step 3b if recruiter cancels deletion.
 
-4c. Recruiter opens the confirmation window and tries to close the window via the x button
-- 4c1. The confirmation window closes and the command box reenables.
+3b. Recruiter aborts the clearing.
+- 3b1. HireHub informs recruiter that the clear of the database has been aborted.
+- Use case ends.
 
+---
+
+### Add job
+
+**System**: Hirehub (Candidate Management System for Company Recruiters)
+
+**Use case**: UC05 - Add jobs to the list
+
+**Actor**: Recruiter
+
+**MSS**
+
+1.  Recruiter enters the details of the job to be added to the list.
+2.  Hirehub adds the job with the corresponding details as requested.
+3.  Hirehub displays the details of the added job.
+
+Use case ends.
+
+**Extensions**
+
+* 1a. Recruiter enters invalid job title.
+  - 1a1. Hirehub raises an error and asks recruiter to provide valid job title.
+  - 1a2. Recruiter attempts to add the job with valid job title.
+  - Steps 1a1-1a2 are repeated until the job title entered is in a correct format.
+  - Use case resumes from step 2.
+
+
+* 1b. Recruiter enters invalid vacancy.
+  - 1b1. Hirehub raises an error and asks recruiter to provide valid vacancy.
+  - 1b2. Recruiter attempts to add the job with valid vacancy.
+  - Steps 1b1-1b2 are repeated until the vacancy entered is valid.
+  - Use case resumes from step 2.
+
+---
+
+### Delete job
+
+**System**: Hirehub (Candidate Management System for Company Recruiters)
+
+**Use case**: UC06 - Delete job from the List
+
+**Actor**: Recruiter
+
+**MSS**
+
+1. Recruiter finds a job index to delete from the list displayed in the app.
+2. Recruiter deletes the job.
+3. Hirehub requests the recruiter to confirm the deletion.
+4. Recruiter confirms deletion.
+5. Hirehub deletes the job from the list and displays the deleted job with its attributes.
+
+Use case ends.
+
+**Extensions**
+
+* 2a. Recruiter enters invalid job index.
+  - 2a1. Hirehub raises an error and asks recruiter to provide valid job index.
+  - 2a2. Recruiter attempts to delete the job with valid job index.
+  - Steps 2a1-2a2 are repeated until the job index entered is correct.
+  - Use case resumes from step 3.
+
+
+* 4a. Recruiter cancels deletion in confirmation stage.
+  - 4a1. Hirehub exits the deletion process.
+  - Use case ends.
+
+
+* 4b. Recruiter enters invalid input for confirmation page.
+  - 4b1. Hirehub prompts the recruiter to enter a valid input.
+  - Use case 4b is repeated if the recruiter enters invalid input for the confirmation page again.
+  - Use case resumes from step 5 if recruiter confirms deletion.
+  - Use case resumes from step 4a if recruiter cancels deletion.
+
+---
+
+### Edit job details
+
+**System**: Hirehub (Candidate Management System for Company Recruiters)
+
+**Use case**: UC07 - Edit Job from the List
+
+**Actor**: Recruiter
+
+**MSS**
+
+1. Recruiter finds a job index to edit from the list displayed in the app.
+2. Recruiter enters the job details to update in the list.
+3. Hirehub updates the job details as requested.
+4. Hirehub displays the edited job with the edited attributes.
+
+Use case ends.
+
+**Extensions**
+
+* 2a. Recruiter enters invalid job index that is not a positive integer.
+  - 2a1. Hirehub raises an error and asks recruiter to provide a valid job index.
+  - 2a2. Recruiter attempts to edit the job with a valid job index.
+  - Steps 2a1-2a2 are repeated until the job index entered is correct.
+  - Use case resumes from step 3.
+
+
+* 2b. Recruiter enters invalid job title.
+  - 2b1. Hirehub raises an error and asks recruiter to provide a valid job title.
+  - 2b2. Recruiter attempts to edit the job with a valid job title.
+  - Steps 2b1-2b2 are repeated until the job title entered is in a correct format.
+  - Use case resumes from step 3.
+
+
+* 2c. Recruiter enters invalid vacancy.
+  - 2c1. Hirehub raises an error and asks recruiter to provide a valid vacancy.
+  - 2c2. Recruiter attempts to edit the job with valid vacancy.
+  - Steps 2c1-2c2 are repeated until the vacancy entered is valid.
+  - Use case resumes from step 3.
+
+
+* 2d. No attributes are provided by recruiter to update.
+  - 2d1. Hirehub raises an error and asks the recruiter to provide at least one attribute to update.
+  - 2d2. Recruiter attempts to edit the job with at least one attribute to update.
+  - Steps 2d1-2d2 are repeated until recruiter enters at least one attribute to update.
+  - Use case resumes from step 3.
+
+
+* 2e. Recruiter enters a positive integer for job index that is out of range.
+  - 2e1. Hirehub raises an error and asks the recruiter to provide correct job index from 1 to the number of jobs in the list.
+  - 2e2. Recruiter attempts to edit the job with valid job index within the range.
+  - Steps 2e1-2e2 are repeated until recruiter enters valid job index.
+  - Use case resumes from step 3.
+
+
+* 2f. Recruiter enters a vacancy that is fewer than the current number of OFFERED applications to the job.
+  - 2f1. Hirehub raises an error and asks the recruiter to provide a larger vacancy.
+  - 2f2. Recruiter attempts to edit the job with a vacancy that is not fewer than the current number of OFFERED applications to the job.
+  - Steps 2f1-2f2 are repeated until recruiter enters a vacancy that is not fewer than the current number of OFFERED applications to the job.
+  - Use case resumes from step 3.
+
+---
+
+### Add application
+
+**System**: Hirehub (Candidate Management System for Company Recruiters)
+
+**Use case**: UC08 - Add application to the List
+
+**Actor**: Recruiter
+
+**MSS**
+
+1.  Recruiter enters the details of the application to be added to the list.
+2.  Hirehub adds the application with the corresponding details as requested.
+3.  Hirehub displays the details of the added application.
+
+Use case ends.
+
+
+**Extensions**
+
+* 1a. Recruiter enters invalid email address.
+  - 1a1. Hirehub raises an error and asks recruiter to provide valid email address.
+  - 1a2. Recruiter attempts to add the application of a person with valid email address.
+  - Steps 1a1-1a2 are repeated until the email address entered is in a correct format.
+  - Use case resumes from step 2.
+
+
+* 1b. Recruiter enters invalid job title.
+  - 1b1. Hirehub raises an error and asks recruiter to provide valid job title.
+  - 1b2. Recruiter attempts to add the application to a job with a valid job title.
+  - Steps 1b1-1b2 are repeated until the job title entered is in the correct format.
+  - Use case resumes from step 2.
+
+
+* 1c. Recruiter enters invalid status.
+  - 1c1. Hirehub raises an error and asks recruiter to provide valid status.
+  - 1c2. Recruiter attempts to add the application with valid status.
+  - Steps 1c1-1c2 are repeated until the status entered is a valid status.
+  - Use case resumes from step 2.
+
+  
+* 1d. Recruiter enters an email address that is not in the person list.
+  - 1d1. Hirehub raises an error and asks recruiter to provide an email address that is in the list.
+  - 1d2. Recruiter attempts to add the application of an existing person.
+  - Steps 1d1-1d2 are repeated until the email address entered is an email address of an existing person.
+  - Use case resumes from step 2. 
+
+
+* 1e. Recruiter enters a job title that is not in the job list.
+  - 1e1. Hirehub raises an error and asks recruiter to provide a job title that is in the list.
+  - 1e2. Recruiter attempts to add the application to an existing job.
+  - Steps 1e1-1e2 are repeated until the job title entered is a job title of an existing job.
+  - Use case resumes from step 2.
+
+---
+
+### Delete application
+
+**System**: Hirehub (Candidate Management System for Company Recruiters)
+
+**Use case**: UC09 - Delete application from the List
+
+**Actor**: Recruiter
+
+**MSS**
+
+1. Recruiter finds an application index to delete from the application list displayed in the app.
+2. Recruiter deletes the application.
+3. Hirehub requests the recruiter to confirm the deletion.
+4. Recruiter confirms deletion.
+5. Hirehub deletes the application from the list and displays the deleted application with its attributes.
+
+Use case ends.
+
+**Extensions**
+
+* 2a. Recruiter enters invalid application index.
+  - 2a1. Hirehub raises an error and asks recruiter to provide valid application index.
+  - 2a2. Recruiter attempts to delete the application with valid application index.
+  - Steps 2a1-2a2 are repeated until the application index entered is correct.
+  - Use case resumes from step 3.
+
+
+* 4a. Recruiter cancels deletion in confirmation stage.
+  - 4a1. Hirehub exits the deletion process.
+  - Use case ends.
+
+
+* 4b. Recruiter enters invalid input for confirmation page.
+  - 4b1. Hirehub prompts the recruiter to enter a valid input.
+  - Use case 4b is repeated if the recruiter enters invalid input for the confirmation page again.
+  - Use case resumes from step 5 if recruiter confirms deletion.
+  - Use case resumes from step 4a if recruiter cancels deletion.
+
+---
 
 ### Non-Functional Requirements
 
@@ -524,6 +860,7 @@ Use case ends.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 * **Command**: The first word in the user input
+* **GUI**: Graphical user interface
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -542,16 +879,14 @@ testers are expected to do more *exploratory* testing.
 
    1. Download the jar file and copy into an empty folder
 
-   1. Double-click the jar file Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
+   1. Run the command `java -jar hirehub.jar` on the command line in the same directory or double-click the jar file. Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
 
 1. Saving window preferences
 
    1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
-   1. Re-launch the app by double-clicking the jar file.<br>
+   1. Re-launch the app by running the command `java -jar hirehub.jar` on the command line in the same directory or double-clicking the jar file.<br>
        Expected: The most recent window size and location is retained.
-
-1. _{ more test cases …​ }_
 
 ### Deleting a person
 
@@ -568,12 +903,56 @@ testers are expected to do more *exploratory* testing.
    1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
       Expected: Similar to previous.
 
-1. _{ more test cases …​ }_
-
 ### Saving data
+Hirehub data is saved locally in three separate files `addressbook.json`, `applications.json` and `jobs.json` automatically after any command.
 
-1. Dealing with missing/corrupted data files
+1. Test case: Data folder is missing
 
-   1. _{explain how to simulate a missing/corrupted file, and the expected behavior}_
+   a. On app launch, if no data folder is detected, a new Hirehub instance with sample data will be used. 
+   
+   b. Run any command and a new data folder containing `addressbook.json`, `applications.json` and `jobs.json` files will be generated.
+   
+   c. If you do not run any command and quit the app, no data folder or file will be generated.
+  
+2. Test case: All three files `addressbook.json`, `applications.json` and `jobs.json` are missing in the data folder.
 
-1. _{ more test cases …​ }_
+   a. On app launch, if there is a data folder but it is empty, a new Hirehub instance with sample data will be used.
+   
+   b. Run any command and three files `addressbook.json`, `applications.json` and `jobs.json` will be generated in the data folder.
+   
+   c. If you do not run any command and quit the app, no files will be generated.
+   
+3. Test case: `jobs.json` is corrupted i.e. does not follow the correct format
+
+   a. On app launch, if any file is corrupted, a new Hirehub instance with only data from `addressbook.json` will be used, assuming `addressbook.json` is not corrupted.
+   
+   b. Run any command and the contents of the three JSON files will be overwritten to contain the new data, which is of a correct format.
+   
+   c. If you do not run any command and quit the app, no changes will be made to the three JSON files.
+
+4. Test case: `addressbook.json` is corrupted i.e. does not follow the correct format
+
+   a. On app launch, if any file is corrupted, a new Hirehub instance with only data from `jobs.json` will be used, assuming `jobs.json` is not corrupted.
+   
+   b. Run any command and the contents of the three JSON files will be overwritten to contain the new data, which is of a correct format.
+   
+   c. If you do not run any command and quit the app, no changes will be made to the three JSON files.
+
+
+5. Test case: `applications.json` is corrupted i.e. does not follow the correct format
+
+   a. On app launch, if any file is corrupted, a new Hirehub instance with data from both `addressbook.json` and `jobs.json` will be used, assuming the two files are not corrupted.
+   
+   b. Run any command and the contents of the three JSON files will be overwritten to contain the new data, which is of a correct format.
+   
+   c. If you do not run any command and quit the app, no changes will be made to the three JSON files.
+
+## **Appendix: Planned enhancements**
+1. Currently, the help command opens a new window, which contains a link to the app’s user guide which is hosted online. In future iterations, we intend to add a summarised overview of all commands in the window that pops up with the help command to enhance the user experience, and reduce reliance on an internet connection.
+2. Currently, in the event when country code is provided, Hirehub does not verify that the country code is correct. Hirehub also does not verify if the phone number is valid with the given country code. In future iterations, we intend to add the corresponding validation checks.
+3. Currently, Hirehub does not support backslashes or commas for the name fields. In future iterations, we intend to add support for these characters, as well as other special characters that may appear in names.
+4. Currently, the UI may appear to be too small without resizing to full screen. Hence, we plan to increase default UI size to enhance the UI.
+5. Currently, if no details are changed from an edit, the edit operation would go through with a success message. As editing without changing details is likely unintentional, we intend to add a message to inform the user that no details has been changed from the edit.
+6. Currently, we can add duplicate tags to a candidate without any errors, and only one of the duplicate tags would be added to the candidate. We intend to add a message informing the user that they are adding duplicate tags.
+7. Currently, tags only support alphanumeric characters, which means that whitespaces are not supported. We intend to support tags with multiple words by relaxing the constraints of the tag to allow for whitespaces.
+8. Currently, the UI does not support wrapping of tags. We intend to fix this in the future to allow users to view tags with long names.

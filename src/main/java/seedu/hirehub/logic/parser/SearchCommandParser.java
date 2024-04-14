@@ -7,19 +7,12 @@ import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_COUNTRY;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_STATUS;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_TAG;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
 
 import seedu.hirehub.logic.commands.SearchCommand;
 import seedu.hirehub.logic.commands.SearchCommand.SearchPersonDescriptor;
 import seedu.hirehub.logic.parser.exceptions.ParseException;
 import seedu.hirehub.model.person.Comment;
-import seedu.hirehub.model.tag.Tag;
 
 /**
  * Parses input arguments and creates a new SearchCommand object
@@ -34,7 +27,7 @@ public class SearchCommandParser implements Parser<SearchCommand> {
     public SearchCommand parse(String args) throws ParseException {
         requireNonNull(args);
         ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_COUNTRY, PREFIX_STATUS,
+                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_COUNTRY,
                         PREFIX_COMMENT, PREFIX_TAG);
         String trimmedArgs = args.trim();
         String trimmedPreamble = argMultimap.getPreamble().trim();
@@ -45,7 +38,7 @@ public class SearchCommandParser implements Parser<SearchCommand> {
             throw new ParseException(SearchCommand.MESSAGE_NO_FIELD_PROVIDED);
         }
 
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_COUNTRY, PREFIX_STATUS,
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_COUNTRY,
                 PREFIX_COMMENT, PREFIX_TAG);
 
         SearchPersonDescriptor searchPersonDescriptor = new SearchPersonDescriptor();
@@ -62,29 +55,13 @@ public class SearchCommandParser implements Parser<SearchCommand> {
         if (argMultimap.getValue(PREFIX_COUNTRY).isPresent()) {
             searchPersonDescriptor.setCountry(ParserUtil.parseCountry(argMultimap.getValue(PREFIX_COUNTRY).get()));
         }
-        if (argMultimap.getValue(PREFIX_STATUS).isPresent()) {
-            searchPersonDescriptor.setStatus(ParserUtil.parseStatus(argMultimap.getValue(PREFIX_STATUS).get()));
-        }
         if (argMultimap.getValue(PREFIX_COMMENT).isPresent()) {
             searchPersonDescriptor.setComment(new Comment(argMultimap.getValue(PREFIX_COMMENT).get()));
         }
-        parseTagsForSearch(argMultimap.getAllValues(PREFIX_TAG)).ifPresent(searchPersonDescriptor::setTags);
+        if (argMultimap.getValue(PREFIX_TAG).isPresent()) {
+            searchPersonDescriptor.setTags(ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG)));
+        }
 
         return new SearchCommand(searchPersonDescriptor);
-    }
-
-    /**
-     * Parses {@code Collection<String> tags} into a {@code Set<Tag>} if {@code tags} is non-empty.
-     * If {@code tags} contain only one element which is an empty string, it will be parsed into a
-     * {@code Set<Tag>} containing zero tags.
-     */
-    private Optional<Set<Tag>> parseTagsForSearch(Collection<String> tags) throws ParseException {
-        assert tags != null;
-
-        if (tags.isEmpty()) {
-            return Optional.empty();
-        }
-        Collection<String> tagSet = tags.size() == 1 && tags.contains("") ? Collections.emptySet() : tags;
-        return Optional.of(ParserUtil.parseTags(tagSet));
     }
 }

@@ -1,46 +1,42 @@
 package seedu.hirehub.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.hirehub.model.Model.PREDICATE_SHOW_ALL_PERSONS;
+import static seedu.hirehub.model.Model.PREDICATE_SHOW_ALL_APPLICATIONS;
 
 import java.util.List;
-import java.util.Set;
 
 import seedu.hirehub.commons.core.index.Index;
 import seedu.hirehub.commons.util.ToStringBuilder;
 import seedu.hirehub.logic.Messages;
 import seedu.hirehub.logic.commands.exceptions.CommandException;
 import seedu.hirehub.model.Model;
-import seedu.hirehub.model.person.Comment;
-import seedu.hirehub.model.person.Country;
-import seedu.hirehub.model.person.Email;
-import seedu.hirehub.model.person.Name;
-import seedu.hirehub.model.person.Person;
-import seedu.hirehub.model.person.Phone;
-import seedu.hirehub.model.person.Status;
-import seedu.hirehub.model.tag.Tag;
+import seedu.hirehub.model.application.Application;
+import seedu.hirehub.model.status.Status;
 
 /**
- * Updates recruitment status for candidates in the address book.
+ * Updates recruitment status of an application in the address book.
  */
 public class StatusCommand extends Command {
 
     public static final String COMMAND_WORD = "status";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Updates recruitment status of a candidate"
-            + " existing in the address book to one of the five status:\n"
-            + "PRESCREEN, IN_PROGRESS, WAITLIST, ACCEPTED, REJECTED\n"
-            + "Parameters: INDEX (must be a positive integer) STATUS \n"
-            + "Example: " + COMMAND_WORD + " 2 ACCEPTED";
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Update status for an application within "
+            + "the application list to one of the following 5 statuses:\n"
+            + "PRESCREEN, IN_PROGRESS, WAITLIST, OFFERED, REJECTED\n"
+            + "Parameters: INDEX (must be a positive integer) STATUS\n"
+            + "Example: " + COMMAND_WORD + " 1 "
+            + "OFFERED";
 
-    public static final String MESSAGE_STATUS_PERSON_SUCCESS = "Status of Candidate Number %1$d Successfully"
-            + " Updated to %2$s";
+    public static final String MESSAGE_STATUS_PERSON_SUCCESS = "Status of application successfully "
+            + "updated to %1$s";
 
-    public static final String MESSAGE_DUPLICATE_PERSON = "This candidate with identical recruitment status "
-            + "already exists in the address book or this candidate's status is already set to %1$s.";
+    public static final String MESSAGE_DUPLICATE_STATUS = "This application with identical recruitment status %1$s "
+            + "already exists in the application list";
 
-    public static final String STATUS_CANNOT_BE_EDITED = "Status of candidates cannot be edited via edit method.\n"
-            + "Please use status command instead in order to update recruitment status for candidates.";
+    public static final String MESSAGE_EXCEEDS_VACANCY = "The number of accepted candidates already meets the"
+            + " stipulated vacancy.\nTo accept more candidates, the vacancy for the job can be increased via the"
+            + " edit_job command, or change status for existing application(s) to this job via status command to"
+            + " a status other than OFFERED.\nYou can retrieve vacancies left via slots_left command";
     private final Index index;
     private final Status status;
 
@@ -50,7 +46,6 @@ public class StatusCommand extends Command {
     public StatusCommand(Index index, Status status) {
         requireNonNull(index);
         requireNonNull(status);
-
         this.index = index;
         this.status = status;
     }
@@ -58,40 +53,29 @@ public class StatusCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
+        List<Application> lastShownApplicationList = model.getFilteredApplicationList();
 
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        if (index.getZeroBased() >= lastShownApplicationList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_APPLICATION_DISPLAYED_INDEX);
         }
 
-        Person personToUpdateStatus = lastShownList.get(index.getZeroBased());
-        Person statusUpdatedPerson = updatePersonStatus(personToUpdateStatus);
+        Application applicationToUpdate = lastShownApplicationList.get(index.getZeroBased());
 
-        if (personToUpdateStatus.equals(statusUpdatedPerson) && model.hasPerson(statusUpdatedPerson)) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_PERSON, status.toString()));
+        if (status.equals(applicationToUpdate.status)) {
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_STATUS, status));
         }
 
-        model.setPerson(personToUpdateStatus, statusUpdatedPerson);
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_STATUS_PERSON_SUCCESS,
-                index.getOneBased(), status.toString()));
-    }
+        if (status.equals(new Status("OFFERED"))
+                && model.countRemainingVacancy(applicationToUpdate.getJob().getTitle()) <= 0) {
+            throw new CommandException(MESSAGE_EXCEEDS_VACANCY);
+        }
 
-    /**
-     * Updates a person with a new user-provided status among one of the five enum values
-     */
-    public Person updatePersonStatus(Person personToUpdateStatus) {
-        assert personToUpdateStatus != null;
+        Application editedApplication = new Application(applicationToUpdate.getPerson(),
+                applicationToUpdate.getJob(), status);
 
-        Name updatedName = personToUpdateStatus.getName();
-        Phone updatedPhone = personToUpdateStatus.getPhone();
-        Email updatedEmail = personToUpdateStatus.getEmail();
-        Country updatedCountry = personToUpdateStatus.getCountry();
-        Comment updatedComment = personToUpdateStatus.getComment();
-        Set<Tag> updatedTags = personToUpdateStatus.getTags();
-
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedCountry, status,
-                updatedComment, updatedTags);
+        model.setApplication(applicationToUpdate, editedApplication);
+        model.updateFilteredApplicationList(PREDICATE_SHOW_ALL_APPLICATIONS);
+        return new CommandResult(String.format(MESSAGE_STATUS_PERSON_SUCCESS, status));
     }
 
     @Override
@@ -113,6 +97,7 @@ public class StatusCommand extends Command {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .add("index", index)
                 .add("status", status)
                 .toString();
     }

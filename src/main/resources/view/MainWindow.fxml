@@ -6,13 +6,16 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.shape.Box?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
 <fx:root type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         title="Address App" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
+         title="HireHub" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
   <icons>
     <Image url="@/images/address_book_32.png" />
   </icons>
@@ -38,21 +41,50 @@
             <Insets top="5" right="10" bottom="5" left="10" />
           </padding>
         </StackPane>
-
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="pane-with-border"
                    minHeight="100" prefHeight="100" maxHeight="100">
           <padding>
             <Insets top="5" right="10" bottom="5" left="10" />
           </padding>
         </StackPane>
-
-        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
+        <HBox prefHeight="1E10" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+          <VBox fx:id="personList" styleClass="pane-with-border" prefWidth="1E10" VBox.vgrow="ALWAYS">
+            <padding>
+              <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <Label text="Candidates"
+                   textAlignment="RIGHT"
+                   HBox.hgrow="ALWAYS"
+                   prefWidth="1E10"
+                   prefHeight="100"
+                   style="-fx-alignment:center; -fx-font-size:32pt; -fx-font-family:Segoe UI Light; -fx-text-fill: white;" />
+            <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+          </VBox>
+          <VBox fx:id= "jobList" styleClass="pane-with-border" prefWidth="1E10" VBox.vgrow="ALWAYS">
           <padding>
             <Insets top="10" right="10" bottom="10" left="10" />
           </padding>
-          <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+            <Label text="Jobs"
+                   textAlignment="RIGHT"
+                   HBox.hgrow="ALWAYS"
+                   prefWidth="1E10"
+                   prefHeight="100"
+                   style="-fx-alignment:center; -fx-font-size:32pt; -fx-font-family:Segoe UI Light; -fx-text-fill: white;" />
+          <StackPane fx:id="jobListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
         </VBox>
-
+          <VBox fx:id= "applicationList" styleClass="pane-with-border" prefWidth="1E10" VBox.vgrow="ALWAYS">
+            <padding>
+              <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <Label text="Applications"
+                   textAlignment="RIGHT"
+                   HBox.hgrow="ALWAYS"
+                   prefWidth="1E10"
+                   prefHeight="100"
+                   style="-fx-alignment:center; -fx-font-size:32pt; -fx-font-family:Segoe UI Light; -fx-text-fill: white;" />
+            <StackPane fx:id="applicationListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
+          </VBox>
+        </HBox>
         <StackPane fx:id="statusbarPlaceholder" VBox.vgrow="NEVER" />
       </VBox>
     </Scene>

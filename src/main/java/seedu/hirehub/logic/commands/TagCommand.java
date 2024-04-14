@@ -6,7 +6,6 @@ import static seedu.hirehub.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import seedu.hirehub.commons.core.index.Index;
@@ -29,6 +28,7 @@ public class TagCommand extends Command {
             + "Existing tags will not be overwritten by the input.\n"
             + "At least one tag must be present.\n"
             + "Parameters: INDEX (must be a positive integer) "
+            + PREFIX_TAG + "TAG "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_TAG + "INTERNAL " + PREFIX_TAG + "WAITLIST";
@@ -62,29 +62,27 @@ public class TagCommand extends Command {
         newTagList.addAll(tags);
         Person editedPerson = new Person(
                 personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
-                personToEdit.getCountry(), personToEdit.getStatus(),
-                personToEdit.getComment(), newTagList);
+                personToEdit.getCountry(), personToEdit.getComment(), newTagList);
 
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-
+        model.replaceApplications(personToEdit, editedPerson);
         return new CommandResult(String.format(MESSAGE_ADD_TAGS_SUCCESS, Messages.format(editedPerson)));
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object other) {
+        if (other == this) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+
+        // instanceof handles nulls
+        if (!(other instanceof TagCommand)) {
             return false;
         }
 
-        TagCommand that = (TagCommand) o;
-
-        if (!Objects.equals(index, that.index)) {
-            return false;
-        }
-        return Objects.equals(tags, that.tags);
+        TagCommand otherTagCommand = (TagCommand) other;
+        return index.equals(otherTagCommand.index)
+                && tags.equals(otherTagCommand.tags);
     }
 }

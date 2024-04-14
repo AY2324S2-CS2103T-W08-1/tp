@@ -8,20 +8,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import seedu.hirehub.commons.core.LogsCenter;
+import seedu.hirehub.logic.commands.AddApplicationCommand;
 import seedu.hirehub.logic.commands.AddCommand;
+import seedu.hirehub.logic.commands.AddJobCommand;
 import seedu.hirehub.logic.commands.ClearCommand;
 import seedu.hirehub.logic.commands.Command;
 import seedu.hirehub.logic.commands.CommentCommand;
-import seedu.hirehub.logic.commands.DeleteCommand;
+import seedu.hirehub.logic.commands.DeleteApplicationCommand;
+import seedu.hirehub.logic.commands.DeleteJobCommand;
+import seedu.hirehub.logic.commands.DeletePersonCommand;
+import seedu.hirehub.logic.commands.DeleteTagCommand;
 import seedu.hirehub.logic.commands.EditCommand;
+import seedu.hirehub.logic.commands.EditJobCommand;
 import seedu.hirehub.logic.commands.ExitCommand;
-import seedu.hirehub.logic.commands.FilterCommand;
-import seedu.hirehub.logic.commands.FindCommand;
 import seedu.hirehub.logic.commands.GetCommand;
 import seedu.hirehub.logic.commands.HelpCommand;
-import seedu.hirehub.logic.commands.InitClearCommand;
+import seedu.hirehub.logic.commands.ListApplicationCommand;
 import seedu.hirehub.logic.commands.ListCommand;
+import seedu.hirehub.logic.commands.ListJobCommand;
+import seedu.hirehub.logic.commands.SearchApplicationCommand;
 import seedu.hirehub.logic.commands.SearchCommand;
+import seedu.hirehub.logic.commands.SearchJobCommand;
+import seedu.hirehub.logic.commands.SlotsLeftCommand;
 import seedu.hirehub.logic.commands.StatusCommand;
 import seedu.hirehub.logic.commands.TagCommand;
 import seedu.hirehub.logic.parser.exceptions.ParseException;
@@ -66,14 +74,11 @@ public class AddressBookParser {
         case EditCommand.COMMAND_WORD:
             return new EditCommandParser().parse(arguments);
 
-        case DeleteCommand.COMMAND_WORD:
-            return new InitDeleteCommandParser().parse(arguments);
+        case DeletePersonCommand.COMMAND_WORD:
+            return new DeletePersonCommandParser().parse(arguments);
 
         case ClearCommand.COMMAND_WORD:
-            return new InitClearCommand();
-
-        case FindCommand.COMMAND_WORD:
-            return new FindCommandParser().parse(arguments);
+            return new ClearCommand();
 
         case SearchCommand.COMMAND_WORD:
             return new SearchCommandParser().parse(arguments);
@@ -99,13 +104,42 @@ public class AddressBookParser {
         case TagCommand.COMMAND_WORD:
             return new TagCommandParser().parse(arguments);
 
-        case FilterCommand.COMMAND_WORD:
-            return new FilterCommandParser().parse(arguments);
+        case DeleteTagCommand.COMMAND_WORD:
+            return new DeleteTagCommandParser().parse(arguments);
+
+        case AddJobCommand.COMMAND_WORD:
+            return new AddJobCommandParser().parse(arguments);
+
+        case EditJobCommand.COMMAND_WORD:
+            return new EditJobCommandParser().parse(arguments);
+
+        case DeleteJobCommand.COMMAND_WORD:
+            return new DeleteJobCommandParser().parse(arguments);
+
+        case SearchJobCommand.COMMAND_WORD:
+            return new SearchJobCommandParser().parse(arguments);
+
+        case AddApplicationCommand.COMMAND_WORD:
+            return new AddApplicationCommandParser().parse(arguments);
+
+        case DeleteApplicationCommand.COMMAND_WORD:
+            return new DeleteApplicationCommandParser().parse(arguments);
+
+        case SearchApplicationCommand.COMMAND_WORD:
+            return new SearchApplicationCommandParser().parse(arguments);
+
+        case ListApplicationCommand.COMMAND_WORD:
+            return new ListApplicationCommand();
+
+        case SlotsLeftCommand.COMMAND_WORD:
+            return new SlotsLeftCommandParser().parse(arguments);
+
+        case ListJobCommand.COMMAND_WORD:
+            return new ListJobCommand();
 
         default:
             logger.finer("This user input caused a ParseException: " + userInput);
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
         }
     }
-
 }

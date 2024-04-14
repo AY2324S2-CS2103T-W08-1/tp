@@ -25,34 +25,30 @@ public class TypicalPersons {
 
     public static final Person ALICE = new PersonBuilder().withName("Alice Pauline")
             .withCountry("SG").withEmail("alice@example.com")
-            .withPhone("94351253").withStatus("PRESCREEN")
-            .withTags("friends").build();
+            .withPhone("94351253").withTags("friends").build();
     public static final Person BENSON = new PersonBuilder().withName("Benson Meier")
             .withCountry("GB").withEmail("johnd@example.com")
-            .withPhone("98765432").withStatus("REJECTED")
-            .withComment("").withTags("owesMoney", "friends").build();
+            .withPhone("98765432").withComment("").withTags("owesMoney", "friends", "enthusiastic").build();
     public static final Person CARL = new PersonBuilder().withName("Carl Kurz").withPhone("95352563")
             .withEmail("heinz@example.com").withCountry("DE").build();
     public static final Person DANIEL = new PersonBuilder().withName("Daniel Meier").withPhone("87652533")
-            .withEmail("cornelia@example.com").withCountry("SG").withStatus("IN_PROGRESS")
-            .withTags("friends").build();
-    public static final Person ELLE = new PersonBuilder().withName("Elle Meyer").withPhone("9482224")
-            .withEmail("werner@example.com").withCountry("US").withStatus("PRESCREEN").build();
-    public static final Person FIONA = new PersonBuilder().withName("Fiona Kunz").withPhone("9482427")
-            .withEmail("lydia@example.com").withCountry("JP").withStatus("ACCEPTED").build();
-    public static final Person GEORGE = new PersonBuilder().withName("George Best").withPhone("9482442")
-            .withEmail("anna@example.com").withCountry("US").withStatus("WAITLIST").build();
+            .withEmail("cornelia@example.com").withCountry("SG").withTags("friends").build();
+    public static final Person ELLE = new PersonBuilder().withName("Elle Meyer").withPhone("94822245")
+            .withEmail("werner@example.com").withCountry("US").build();
+    public static final Person FIONA = new PersonBuilder().withName("Fiona Kunz").withPhone("94824275")
+            .withEmail("lydia@example.com").withCountry("JP").build();
+    public static final Person GEORGE = new PersonBuilder().withName("George Best").withPhone("94824425")
+            .withEmail("anna@example.com").withCountry("US").build();
 
     // Manually added
-    public static final Person HOON = new PersonBuilder().withName("Hoon Meier").withPhone("8482424")
+    public static final Person HOON = new PersonBuilder().withName("Hoon Meier").withPhone("84824242")
             .withEmail("stefan@example.com").withCountry("IN").build();
-    public static final Person IDA = new PersonBuilder().withName("Ida Mueller").withPhone("8482131")
+    public static final Person IDA = new PersonBuilder().withName("Ida Mueller").withPhone("84821311")
             .withEmail("hans@example.com").withCountry("US").build();
 
     // Manually added - Person's details found in {@code CommandTestUtil}
     public static final Person AMY = new PersonBuilder().withName(VALID_NAME_AMY).withPhone(VALID_PHONE_AMY)
-            .withEmail(VALID_EMAIL_AMY).withCountry(VALID_COUNTRY_AMY)
-            .withTags(VALID_TAG_FRIEND).build();
+            .withEmail(VALID_EMAIL_AMY).withCountry(VALID_COUNTRY_AMY).withTags(VALID_TAG_FRIEND).build();
     public static final Person BOB = new PersonBuilder().withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
             .withEmail(VALID_EMAIL_BOB).withCountry(VALID_COUNTRY_BOB)
             .withTags(VALID_TAG_HUSBAND, VALID_TAG_FRIEND).build();

@@ -6,7 +6,6 @@ import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_COUNTRY;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_STATUS;
 import static seedu.hirehub.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.ArrayList;
@@ -24,9 +23,9 @@ import seedu.hirehub.model.person.ContainsKeywordsPredicate;
 import seedu.hirehub.model.person.Country;
 import seedu.hirehub.model.person.Email;
 import seedu.hirehub.model.person.Name;
+import seedu.hirehub.model.person.Person;
 import seedu.hirehub.model.person.Phone;
 import seedu.hirehub.model.person.SearchPredicate;
-import seedu.hirehub.model.person.Status;
 import seedu.hirehub.model.tag.Tag;
 
 /**
@@ -37,7 +36,7 @@ public class SearchCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose attributes match all "
             + "the corresponding specified attributes.\n"
-            + "For phone number, email, country and status, only full words will be matched,\n"
+            + "For phone number, email and country, only full words will be matched,\n"
             + "while for name, comment and tags, partial words will be matched.\n"
             + "Parameters: [" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "
@@ -96,7 +95,6 @@ public class SearchCommand extends Command {
         private Phone phone;
         private Email email;
         private Country country;
-        private Status status;
         private Comment comment;
         private Set<Tag> tags;
 
@@ -134,14 +132,6 @@ public class SearchCommand extends Command {
             return Optional.ofNullable(country);
         }
 
-        public void setStatus(Status status) {
-            this.status = status;
-        }
-
-        public Optional<Status> getStatus() {
-            return Optional.ofNullable(status);
-        }
-
         public void setComment(Comment comment) {
             this.comment = comment;
         }
@@ -167,30 +157,27 @@ public class SearchCommand extends Command {
             return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
         }
 
-        public SearchPredicate getPredicate() {
-            ArrayList<ContainsKeywordsPredicate> predicateList = new ArrayList<>();
-            ContainsKeywordsPredicate<Name> nameSearch =
+        public SearchPredicate<Person> getPredicate() {
+            ArrayList<ContainsKeywordsPredicate<Person, ?>> predicateList = new ArrayList<>();
+            ContainsKeywordsPredicate<Person, Name> nameSearch =
                     new ContainsKeywordsPredicate<>(PREFIX_NAME, this.getName());
             predicateList.add(nameSearch);
-            ContainsKeywordsPredicate<Phone> phoneSearch =
+            ContainsKeywordsPredicate<Person, Phone> phoneSearch =
                     new ContainsKeywordsPredicate<>(PREFIX_PHONE, this.getPhone());
             predicateList.add(phoneSearch);
-            ContainsKeywordsPredicate<Email> emailSearch =
+            ContainsKeywordsPredicate<Person, Email> emailSearch =
                     new ContainsKeywordsPredicate<>(PREFIX_EMAIL, this.getEmail());
             predicateList.add(emailSearch);
-            ContainsKeywordsPredicate<Country> countrySearch =
+            ContainsKeywordsPredicate<Person, Country> countrySearch =
                     new ContainsKeywordsPredicate<>(PREFIX_COUNTRY, this.getCountry());
             predicateList.add(countrySearch);
-            ContainsKeywordsPredicate<Status> statusSearch =
-                    new ContainsKeywordsPredicate<>(PREFIX_STATUS, this.getStatus());
-            predicateList.add(statusSearch);
-            ContainsKeywordsPredicate<Comment> commentSearch =
+            ContainsKeywordsPredicate<Person, Comment> commentSearch =
                     new ContainsKeywordsPredicate<>(PREFIX_COMMENT, this.getComment());
             predicateList.add(commentSearch);
-            ContainsKeywordsPredicate<Set<Tag>> tagSearch =
+            ContainsKeywordsPredicate<Person, Set<Tag>> tagSearch =
                     new ContainsKeywordsPredicate<>(PREFIX_TAG, this.getTags());
             predicateList.add(tagSearch);
-            return new SearchPredicate(predicateList);
+            return new SearchPredicate<>(predicateList);
         }
 
         @Override
@@ -210,7 +197,6 @@ public class SearchCommand extends Command {
                     && Objects.equals(phone, otherSearchPersonDescriptor.phone)
                     && Objects.equals(email, otherSearchPersonDescriptor.email)
                     && Objects.equals(country, otherSearchPersonDescriptor.country)
-                    && Objects.equals(status, otherSearchPersonDescriptor.status)
                     && Objects.equals(comment, otherSearchPersonDescriptor.comment)
                     && Objects.equals(tags, otherSearchPersonDescriptor.tags);
         }
@@ -222,7 +208,6 @@ public class SearchCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("country", country)
-                    .add("status", status)
                     .add("comment", comment)
                     .add("tags", tags)
                     .toString();
